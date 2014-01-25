@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id='main'></div>
+    <div id='chart'></div>
+  </body>
+  <script type="text/javascript">
+    var main = d3.select('#main')
+        .text('Blocks of random length')
+        .style('height', '50px')
+
+var width = 800;
+var height = 200;
+var root = d3.select('#chart').append('svg')
+    .attr({
+      'width': width,
+      'height': height,
+    })
+    .style('border', '1px solid black');
+
+var numRows = 10;
+var maxDataValue = 10
+var dataItems = [];
+for (var i = 0; i < numRows; i++) {
+  dataItems.push(Math.random() * maxDataValue);
+}
+
+COLORS = ['#556270', '#4Ecdc4', '#c7f4c4', '#ff6b6b', '#c44d58']
+OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
+
+var barHeight = height / numRows;
+var barWidth = function(datum) {
+  return datum * (width / maxDataValue);
+};
+var barX = 0;
+var barY = function(datum, index) {
+  return index * barHeight;
+};
+var getColor = function(datum, index) {
+  index = index % COLORS.length
+  return COLORS[index]
+};
+root.selectAll('rect.number')
+    .data(dataItems).enter()
+  .append('rect')
+    .attr({
+      'class': 'number',
+      'x': barX,
+      'y': barY,
+      'width': barWidth,
+      'height': barHeight,
+      'fill': getColor,
+      'stroke': '#444',
+    });
+
+  </script>
+</html>
