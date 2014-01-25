@@ -8,12 +8,12 @@
   </body>
   <script type="text/javascript">
     var main = d3.select('#main')
-        .text('Blocks of random length')
+        .text('Data in your data')
         .style('height', '50px')
 
 var width = 800;
 var height = 200;
-var root = d3.select('#chart').append('svg')
+var root = d3.select('#chart').append('div')
     .attr({
       'width': width,
       'height': height,
@@ -42,9 +42,25 @@ var getColor = function(datum, index) {
   index = index % COLORS.length
   return COLORS[index]
 };
-root.selectAll('rect.number')
-    .data(dataItems).enter()
-  .append('rect')
+
+// Make a div for each row. Want to have it start with
+// text of the question name.
+rows = root.selectAll('div.row').data(dataItems).enter()
+  .append('row')
+    .classed({'row': true})
+    .text(function(rowData) { return rowData.name });
+
+// Want each div to contain an SVG element that we can draw in.
+svgContainers = rows.append('svg')
+    .attr({
+      'width': 700,
+      'height': barHeight,
+    });
+
+// Add a rectangle of the correct lenght in each SVG element.
+bars = svgContainers.select('rect').enter()
+    .append('rect')
+      .data(function(rowData) { return rowData.length })
     .attr({
       'class': 'number',
       'x': barX,
@@ -54,6 +70,7 @@ root.selectAll('rect.number')
       'fill': getColor,
       'stroke': '#444',
     });
+
 
   </script>
 </html>
