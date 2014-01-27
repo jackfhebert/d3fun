@@ -1,6 +1,12 @@
 <html>
   <head>
     <script src="./d3.v3.min.js" charset="utf-8"></script>
+
+  <style type="text/css">
+    div.row span {
+    color: red;
+  }
+  </style>
   </head>
   <body>
     <div id='main'></div>
@@ -20,33 +26,32 @@ var root = d3.select('#chart').append('div')
     })
     .style('border', '1px solid black');
 
+// The number of rows in the figure.
 var numRows = 10;
+// TODO: Move this to a d3 scale.
 var maxDataValue = 10
+// The data, a list of info per row.
 var dataItems = [];
 for (var i = 0; i < numRows; i++) {
-  // For the nested data thing to work, the width needs to be
-  // a list. This will eventually be more complicated than
-  // than a single element list.
-  var toAdd = {'name': '' + i,
-               'width': [Math.random() * maxDataValue]}
+  // Randomly pick the number of blocks that will be in this data row.
+  // Note that we will have [1, 5].
+  var numWidths = 1 + Math.random() * 4;
+  // Build up the list of block widths in this row and track the total
+  // running width which marks how far along each block should start.
+  var widths = [];
+  var totalWidth = 0;
+  for (var j = 0; j < numWidths; j++) {
+    // Pick a random size for the current block.
+    var currentWidth = Math.random() * maxDataValue / 4;
+    // Start gives the position of where this block starts, width
+    // is the size of the current block.
+    widths.push({'start': totalWidth, 'width': currentWidth})
+    totalWidth += currentWidth;
+  }
+  // Add the row and the blocks that comprise the row.
+  var toAdd = {'name': '' + i, 'widths': widths,}
   dataItems.push(toAdd);
 }
-
-COLORS = ['#556270', '#4Ecdc4', '#c7f4c4', '#ff6b6b', '#c44d58']
-OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
-
-var barHeight = height / numRows;
-var barWidth = function(datum) {
-  return datum * (width / maxDataValue);
-};
-var barX = 0;
-var barY = function(datum, index) {
-  return index * barHeight;
-};
-var getColor = function(datum, localIndex, parentIndex) {
-  index = parentIndex % COLORS.length
-  return COLORS[index]
-};
 
 // Make a div for each row. Want to have it start with
 // text of the question name.
@@ -57,6 +62,9 @@ var rows = root.selectAll('div.row').data(dataItems).enter()
 rows.append('span')
     .text(function(rowData) { return rowData.name });
 
+// Distribute the height of the viz over the N rows.
+var barHeight = height / numRows;
+
 // Want each div to contain an SVG element that we can draw in.
 var svgContainers = rows.append('svg')
     .attr({
@@ -64,10 +72,31 @@ var svgContainers = rows.append('svg')
       'height': barHeight + 5,
     });
 
+// Sets of colors we can use to paint the blocks.
+COLORS = ['#556270', '#4Ecdc4', '#c7f4c4', '#ff6b6b', '#c44d58']
+OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
+
+// Function to give the scaled width of a block in pixels.
+var barWidth = function(datum) {
+  return datum.width * (width / maxDataValue);
+};
+
+// Function to give the scaled start X position of a block.
+var barX = function(datum) {
+  return datum.start * (width / maxDataValue)
+};
+
+// Function to give the color of the block. Currently we use
+// the index in the current row.
+var getColor = function(datum, localIndex, parentIndex) {
+  index = localIndex % COLORS.length
+  return COLORS[index]
+};
+
 
 // Add a rectangle of the correct lenght in each SVG element.
 var bars = svgContainers.selectAll('rect.number')
-    .data(function(d) { return d.width; }).enter()
+    .data(function(d) { return d.widths; }).enter()
     .append('rect')
     .attr({
       'class': 'number',
