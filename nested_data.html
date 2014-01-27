@@ -24,7 +24,9 @@ var numRows = 10;
 var maxDataValue = 10
 var dataItems = [];
 for (var i = 0; i < numRows; i++) {
-  dataItems.push(Math.random() * maxDataValue);
+  var toAdd = {'name': '' + i,
+               'baz': Math.random() * maxDataValue}
+  dataItems.push(toAdd);
 }
 
 COLORS = ['#556270', '#4Ecdc4', '#c7f4c4', '#ff6b6b', '#c44d58']
@@ -32,7 +34,7 @@ OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
 
 var barHeight = height / numRows;
 var barWidth = function(datum) {
-  return datum * (width / maxDataValue);
+  return datum.baz * (width / maxDataValue);
 };
 var barX = 0;
 var barY = function(datum, index) {
@@ -45,28 +47,30 @@ var getColor = function(datum, index) {
 
 // Make a div for each row. Want to have it start with
 // text of the question name.
-rows = root.selectAll('div.row').data(dataItems).enter()
-  .append('row')
+var rows = root.selectAll('div.row').data(dataItems).enter()
+  .append('div')
     .classed({'row': true})
+    .style('height', '25px')
+rows.append('span')
     .text(function(rowData) { return rowData.name });
 
 // Want each div to contain an SVG element that we can draw in.
-svgContainers = rows.append('svg')
+var svgContainers = rows.append('svg')
     .attr({
       'width': 700,
-      'height': barHeight,
+      'height': barHeight + 5,
     });
 
 // Add a rectangle of the correct lenght in each SVG element.
-bars = svgContainers.select('rect').enter()
+var bars = svgContainers.selectAll('rect.number')
+    .data(function(d) { return d; }).enter()
     .append('rect')
-      .data(function(rowData) { return rowData.length })
     .attr({
       'class': 'number',
       'x': barX,
-      'y': barY,
+      'y': 3,
       'width': barWidth,
-      'height': barHeight,
+      'height': barHeight - 2,
       'fill': getColor,
       'stroke': '#444',
     });
