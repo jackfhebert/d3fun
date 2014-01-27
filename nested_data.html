@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="./d3.v3.min.js" charset="utf-8"></script>
   </head>
   <body>
     <div id='main'></div>
@@ -24,8 +24,11 @@ var numRows = 10;
 var maxDataValue = 10
 var dataItems = [];
 for (var i = 0; i < numRows; i++) {
+  // For the nested data thing to work, the width needs to be
+  // a list. This will eventually be more complicated than
+  // than a single element list.
   var toAdd = {'name': '' + i,
-               'baz': Math.random() * maxDataValue}
+               'width': [Math.random() * maxDataValue]}
   dataItems.push(toAdd);
 }
 
@@ -34,14 +37,14 @@ OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
 
 var barHeight = height / numRows;
 var barWidth = function(datum) {
-  return datum.baz * (width / maxDataValue);
+  return datum * (width / maxDataValue);
 };
 var barX = 0;
 var barY = function(datum, index) {
   return index * barHeight;
 };
-var getColor = function(datum, index) {
-  index = index % COLORS.length
+var getColor = function(datum, localIndex, parentIndex) {
+  index = parentIndex % COLORS.length
   return COLORS[index]
 };
 
@@ -61,9 +64,10 @@ var svgContainers = rows.append('svg')
       'height': barHeight + 5,
     });
 
+
 // Add a rectangle of the correct lenght in each SVG element.
 var bars = svgContainers.selectAll('rect.number')
-    .data(function(d) { return d; }).enter()
+    .data(function(d) { return d.width; }).enter()
     .append('rect')
     .attr({
       'class': 'number',
@@ -74,7 +78,6 @@ var bars = svgContainers.selectAll('rect.number')
       'fill': getColor,
       'stroke': '#444',
     });
-
 
   </script>
 </html>
