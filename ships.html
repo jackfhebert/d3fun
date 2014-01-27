@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <ul id='ship-list'></div>
+  </body>
+  <script type="text/javascript">
+// This is an example from:
+// http://code.hazzens.com/d3tut/lesson_3.html
+
+var ships = [
+  {
+    'name': 'Enterprise',
+    'crew': [
+      {name: 'Picard', position: 'Captain'},
+      {name: 'Riker', position: 'Tool'},
+      {name: 'Data', position: 'Android'},
+      {name: 'Worf', position: 'Security Officer'},
+      {name: 'Troi', position: 'Counselor'},
+    ],
+  },
+  {
+    'name': 'Millenium Falcon',
+    'crew': [
+      {name: 'Hans Solo', position: 'Pilot'},
+      {name: 'Chewie', position: 'Pilot'},
+    ],
+  },
+];
+
+var ships = d3.select('#ship-list').selectAll('li.starship')
+    .data(ships).enter()
+  .append('li')
+    .attr('class', 'starship')
+    .text(function(starshipData) { return starshipData.name; });
+
+var shipCrewList = ships.append('ul')
+    .attr('class', 'crew-list');
+
+var crewMembers = shipCrewList.selectAll('li.crew-member')
+    .data(function(starshipDatazz) { return starshipDatazz.crew; }).enter()
+  .append('li')
+    .attr('class', 'crew-member');
+
+crewMembers.append('span')
+    .attr('class', 'name')
+    .text(function(crewData) { return crewData.name; });
+
+crewMembers.append('span')
+    .attr('class', 'position')
+    .text(function(crewData) { return ' [' + crewData.position + ']'; });
+  </script>
+</html>
