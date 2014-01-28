@@ -76,14 +76,18 @@ var svgContainers = rows.append('svg')
 COLORS = ['#556270', '#4Ecdc4', '#c7f4c4', '#ff6b6b', '#c44d58']
 OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
 
+var scale = d3.scale.linear()
+  .domain([0, maxDataValue])
+  .range([0, width])
+
 // Function to give the scaled width of a block in pixels.
 var barWidth = function(datum) {
-  return datum.width * (width / maxDataValue);
+  return scale(datum.width);
 };
 
 // Function to give the scaled start X position of a block.
 var barX = function(datum) {
-  return datum.start * (width / maxDataValue)
+  return scale(datum.start);
 };
 
 // Function to give the color of the block. Currently we use
@@ -107,6 +111,5 @@ var bars = svgContainers.selectAll('rect.number')
       'fill': getColor,
       'stroke': '#444',
     });
-
   </script>
 </html>
