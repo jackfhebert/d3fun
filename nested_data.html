@@ -1,12 +1,12 @@
 <html>
   <head>
-    <script src="./d3.v3.min.js" charset="utf-8"></script>
-
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <style type="text/css">
     div.row span {
     color: red;
   }
   </style>
+  <title>Data in your data</title>
   </head>
   <body>
     <div id='main'></div>
@@ -45,7 +45,9 @@ for (var i = 0; i < numRows; i++) {
     var currentWidth = Math.random() * maxDataValue / 4;
     // Start gives the position of where this block starts, width
     // is the size of the current block.
-    widths.push({'start': totalWidth, 'width': currentWidth})
+    widths.push({'start': totalWidth,
+                 'width': currentWidth,
+                 'title': 'Step ' + j})
     totalWidth += currentWidth;
   }
   // Add the row and the blocks that comprise the row.
@@ -134,6 +136,7 @@ var bars = svgContainers.selectAll('rect.number')
       'fill': getColor,
       'stroke': '#444',
     });
-
+bars.append('title')
+    .text(function(datum) { return datum.title || ''; });
   </script>
 </html>
