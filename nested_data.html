@@ -59,8 +59,6 @@ var rows = root.selectAll('div.row').data(dataItems).enter()
   .append('div')
     .classed({'row': true})
     .style('height', '25px')
-rows.append('span')
-    .text(function(rowData) { return rowData.name });
 
 // Distribute the height of the viz over the N rows.
 var barHeight = height / numRows;
@@ -70,6 +68,29 @@ var svgContainers = rows.append('svg')
     .attr({
       'width': 700,
       'height': barHeight + 5,
+    });
+
+// A grouping to hold the entire bar.
+svgContainers = svgContainers.append('g')
+    .attr({
+      'width': 700,
+      'height': barHeight + 5,
+    });
+
+// Add the text element. Note that it uses the 'y' as the bottom corner
+// of the text (I think that this is configurable) so point it towards the
+// bottom of the row height.
+svgContainers.append('text')
+    .attr({
+      'x': 0,
+      'y': barHeight - 4,
+     })
+    .text(function(rowData) { return 'Q' + rowData.name });
+
+// Add a grouping to hold all of the rectangles in the bar.
+svgContainers = svgContainers.append('g')
+    .attr({
+      'transform': 'translate(25, 0)'
     });
 
 // Sets of colors we can use to paint the blocks.
@@ -106,10 +127,13 @@ var bars = svgContainers.selectAll('rect.number')
       'class': 'number',
       'x': barX,
       'y': 3,
+      'rx': 3,
+      'ry': 3,
       'width': barWidth,
       'height': barHeight - 2,
       'fill': getColor,
       'stroke': '#444',
     });
+
   </script>
 </html>
