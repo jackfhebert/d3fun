@@ -44,7 +44,7 @@ for (var i = 0; i < numRows; i++) {
   for (var j = 0; j < numStages; j++) {
     if (Math.random() < oddsOfFinishing) {
       // The case where this stage has finished.
-      var currentWidth = Math.random() * maxDataValue / 4;
+      var currentWidth = Math.random() * maxDataValue / 5;
       widths.push({'start': totalWidth,
                    'title': 'Step ' + (j + 1),
                    'width': currentWidth});
@@ -75,14 +75,14 @@ var barHeight = height / numRows;
 // Want each div to contain an SVG element that we can draw in.
 var svgContainers = rows.append('svg')
     .attr({
-      'width': 700,
+      'width': width,
       'height': barHeight + 5,
     });
 
 // A grouping to hold the entire bar.
 svgContainers = svgContainers.append('g')
     .attr({
-      'width': 700,
+      'width': width,
       'height': barHeight + 5,
     });
 
@@ -109,7 +109,7 @@ OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
 
 var scale = d3.scale.linear()
   .domain([0, maxDataValue])
-  .range([0, width])
+  .range([0, width - 25])
 
 // Function to give the scaled width of a block in pixels.
 var barWidth = function(datum) {
