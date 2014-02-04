@@ -1,0 +1,175 @@
+<html>
+  <head>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <style type="text/css">
+    div.row span {
+    color: red;
+  }
+  </style>
+  <title>Keys on keys on keys</title>
+  </head>
+  <body>
+    <div id='main'></div>
+    <div id='chart'></div>
+  </body>
+  <script type="text/javascript">
+    var main = d3.select('#main')
+        .text('Keyed data')
+        .style('height', '50px')
+
+var width = 800;
+var height = 200;
+var root = d3.select('#chart').append('div')
+    .attr({
+      'width': width,
+      'height': height,
+    })
+    .style('border', '1px solid black');
+
+// The number of rows in the figure.
+var numRows = 10;
+// Maximum element, will get scaled to the right number of pixels.
+var maxDataValue = 10;
+// There are up to five stages.
+var numStages = 5;
+var oddsOfFinishing = 0.8;
+
+// The data, a list of info per row.
+var finishedStages = [];
+var pendingStage = [];
+for (var i = 0; i < numRows; i++) {
+
+  var totalWidth = 0;
+  var widths = [];
+  for (var j = 0; j < numStages; j++) {
+    if (Math.random() < oddsOfFinishing) {
+      // The case where this stage has finished.
+      var currentWidth = Math.random() * maxDataValue / 4;
+      widths.push({'start': totalWidth,
+                   'title': 'Step ' + (j + 1),
+                   'width': currentWidth});
+      totalWidth += currentWidth;
+    } else {
+      // This stage didn't finish.
+      pendingStage.push({'name': 'Q' + i,
+                         'start': totalWidth});
+      break;
+    }
+  }
+  finishedStages.push({'name': 'Q' + i,
+                       'widths': widths});    
+}
+
+var keyFn = function(d) { return d.name; };
+
+// Make a div for each row. Want to have it start with
+// text of the question name.
+var rows = root.selectAll('div.row').data(finishedStages, keyFn).enter()
+  .append('div')
+    .classed({'row': true})
+    .style('height', '25px')
+
+// Distribute the height of the viz over the N rows.
+var barHeight = height / numRows;
+
+// Want each div to contain an SVG element that we can draw in.
+var svgContainers = rows.append('svg')
+    .attr({
+      'width': 700,
+      'height': barHeight + 5,
+    });
+
+// A grouping to hold the entire bar.
+svgContainers = svgContainers.append('g')
+    .attr({
+      'width': 700,
+      'height': barHeight + 5,
+    });
+
+// Add the text element. Note that it uses the 'y' as the bottom corner
+// of the text (I think that this is configurable) so point it towards the
+// bottom of the row height.
+svgContainers.append('text')
+    .attr({
+      'x': 0,
+      'y': barHeight - 4,
+     })
+    .text(function(rowData) { return rowData.name });
+
+// Add a grouping to hold all of the rectangles in the bar.
+svgContainers = svgContainers.append('g')
+    .attr({
+      'class': 'barGraph',
+      'transform': 'translate(25, 0)'
+    });
+
+// Sets of colors we can use to paint the blocks.
+COLORS = ['#556270', '#4Ecdc4', '#c7f4c4', '#ff6b6b', '#c44d58']
+OTHER_COLORS = ['#c2412d', '#d1aa34', '#a7a844', '#a46583', '#5a1e4a']
+
+var scale = d3.scale.linear()
+  .domain([0, maxDataValue])
+  .range([0, width])
+
+// Function to give the scaled width of a block in pixels.
+var barWidth = function(datum) {
+  return scale(datum.width);
+};
+
+// Function to give the scaled start X position of a block.
+var barX = function(datum) {
+  return scale(datum.start);
+};
+
+// Function to give the color of the block. Currently we use
+// the index in the current row.
+var getColor = function(datum, localIndex, parentIndex) {
+  index = localIndex % COLORS.length
+  return COLORS[index]
+};
+
+
+// Add a rectangle of the correct lenght in each SVG element.
+var bars = svgContainers.selectAll('rect.number')
+    .data(function(d) { return d.widths; }).enter()
+    .append('rect')
+    .attr({
+      'class': 'number',
+      'x': barX,
+      'y': 3,
+      'rx': 3,
+      'ry': 3,
+      'width': barWidth,
+      'height': barHeight - 2,
+      'fill': getColor,
+      'stroke': '#444',
+    });
+bars.append('title')
+    .text(function(datum) { return datum.title || ''; });
+
+// Function to give the scaled width of a block in pixels.
+var endingBarWidth = function(datum) {
+  return scale((maxDataValue - datum.start) / 2);
+};
+
+var centerX = function(datum) {
+  return scale((datum.start + maxDataValue) / 2);
+};
+
+root.selectAll('div.row')
+  .data(pendingStage, keyFn)
+  .select('g.barGraph')
+  .append('ellipse')
+  .attr({
+      'cx': centerX,
+      'cy': barHeight / 2,
+      'rx': endingBarWidth,
+      'ry': barHeight / 2,
+
+      'fill': getColor,
+      'stroke': '#444',
+    });
+    
+
+  </script>
+</html>
