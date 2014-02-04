@@ -52,6 +52,7 @@ for (var i = 0; i < numRows; i++) {
     } else {
       // This stage didn't finish.
       pendingStage.push({'name': 'Q' + i,
+                         'title': 'Step ' + (j + 1),
                          'start': totalWidth});
       break;
     }
@@ -140,7 +141,7 @@ var bars = svgContainers.selectAll('rect.number')
       'rx': 3,
       'ry': 3,
       'width': barWidth,
-      'height': barHeight - 2,
+      'height': barHeight - 3,
       'fill': getColor,
       'stroke': '#444',
     });
@@ -156,20 +157,21 @@ var centerX = function(datum) {
   return scale((datum.start + maxDataValue) / 2);
 };
 
-root.selectAll('div.row')
+var getPoints = function(datum) {
+  return scale(datum.start) + ',' + 3 + ' ' + scale(datum.start) + ',' + barHeight + ' ' + scale(maxDataValue) + ',' + barHeight / 2
+};
+
+var triangles = root.selectAll('div.row')
   .data(pendingStage, keyFn)
   .select('g.barGraph')
-  .append('ellipse')
+  .append('polygon')
   .attr({
-      'cx': centerX,
-      'cy': barHeight / 2,
-      'rx': endingBarWidth,
-      'ry': barHeight / 2,
+      'points': getPoints,
 
       'fill': getColor,
       'stroke': '#444',
     });
-    
-
+triangles.append('title')
+    .text(function(datum) { return datum.title || ''; });
   </script>
 </html>
