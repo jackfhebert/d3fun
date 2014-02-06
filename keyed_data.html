@@ -15,7 +15,13 @@
   <script type="text/javascript">
     var main = d3.select('#main')
         .text('Keyed data')
-        .style('height', '50px')
+    
+    main.append('p')
+        .text('A line for each item moving through the pipeline.')
+    main.append('p')
+        .text('The pipeline has N stages that must finish, triangles mark unfinished stages.')
+    main.append('p')
+         .text('Green circles indicate the start of an attempt to finish the stage, red circles indicate a logged failure.')
 
 var width = 800;
 var height = 200;
@@ -33,18 +39,31 @@ var maxDataValue = 10;
 // There are up to five stages.
 var numStages = 5;
 var oddsOfFinishing = 0.8;
+var oddsOfExtraLease = 0.25;
+var oddsOfFailure = .5;
 
 // The data, a list of info per row.
 var finishedStages = [];
 var pendingStage = [];
+var taskLeases = [];
+var taskFailures = []
 for (var i = 0; i < numRows; i++) {
-
   var totalWidth = 0;
   var widths = [];
+  var leases = [];
+  var failures = []
   for (var j = 0; j < numStages; j++) {
+    var currentWidth = Math.random() * maxDataValue / 5;
+    leases.push(totalWidth + Math.random() * currentWidth);
+    while (Math.random() < oddsOfExtraLease) {
+      leases.push(totalWidth + Math.random() * currentWidth);
+      if (Math.random() < oddsOfFailure) {
+        failures.push(totalWidth + Math.random() * currentWidth);
+      }
+    }
+
     if (Math.random() < oddsOfFinishing) {
       // The case where this stage has finished.
-      var currentWidth = Math.random() * maxDataValue / 5;
       widths.push({'start': totalWidth,
                    'title': 'Step ' + (j + 1),
                    'width': currentWidth});
@@ -52,11 +71,16 @@ for (var i = 0; i < numRows; i++) {
     } else {
       // This stage didn't finish.
       pendingStage.push({'name': 'Q' + i,
+                         'step': j,
                          'title': 'Step ' + (j + 1),
                          'start': totalWidth});
       break;
     }
   }
+  taskLeases.push({'name': 'Q' + i,
+                   'times': leases})
+  taskFailures.push({'name': 'Q' + i,
+                     'times': failures})
   finishedStages.push({'name': 'Q' + i,
                        'widths': widths});    
 }
@@ -124,18 +148,22 @@ var barX = function(datum) {
 
 // Function to give the color of the block. Currently we use
 // the index in the current row.
-var getColor = function(datum, localIndex, parentIndex) {
+var getColor = function(datum, localIndex) {
   index = localIndex % COLORS.length
+  return COLORS[index]
+};
+var getStepColor = function(datum) {
+  index = datum.step % COLORS.length
   return COLORS[index]
 };
 
 
 // Add a rectangle of the correct lenght in each SVG element.
-var bars = svgContainers.selectAll('rect.number')
+var bars = svgContainers.selectAll('rect.step')
     .data(function(d) { return d.widths; }).enter()
     .append('rect')
     .attr({
-      'class': 'number',
+      'class': 'step',
       'x': barX,
       'y': 3,
       'rx': 3,
@@ -145,8 +173,6 @@ var bars = svgContainers.selectAll('rect.number')
       'fill': getColor,
       'stroke': '#444',
     });
-bars.append('title')
-    .text(function(datum) { return datum.title || ''; });
 
 // Function to give the scaled width of a block in pixels.
 var endingBarWidth = function(datum) {
@@ -158,7 +184,7 @@ var centerX = function(datum) {
 };
 
 var getPoints = function(datum) {
-  return scale(datum.start) + ',' + 3 + ' ' + scale(datum.start) + ',' + barHeight + ' ' + scale(maxDataValue) + ',' + barHeight / 2
+  return scale(datum.start) + ',' + 3 + ' ' + scale(datum.start) + ',' + barHeight + ' ' + scale(maxDataValue) + ',' + (barHeight / 2 + 2) + ' ' + scale(maxDataValue) + ',' + (barHeight / 2 - 2);
 };
 
 var triangles = root.selectAll('div.row')
@@ -166,12 +192,47 @@ var triangles = root.selectAll('div.row')
   .select('g.barGraph')
   .append('polygon')
   .attr({
+      'class': 'step',
       'points': getPoints,
-
-      'fill': getColor,
+      'fill': getStepColor,
       'stroke': '#444',
     });
-triangles.append('title')
+
+// Add dots for each success.
+root.selectAll('div.row')
+  .data(taskLeases, keyFn)
+  .select('g.barGraph')
+  .selectAll('circle.lease')
+  .data(function(d) { return d.times })
+  .enter()
+  .append('circle')
+  .attr({
+    'class': 'lease',
+    'cx': function(d) { return scale(d); },
+    'cy': barHeight / 2 + 1.5,
+    'fill': "green",
+    'r': barHeight / 4,
+  });
+
+// Add dots for each failure.
+root.selectAll('div.row')
+  .data(taskFailures, keyFn)
+  .select('g.barGraph')
+  .selectAll('circle.failure')
+  .data(function(d) { return d.times })
+  .enter()
+  .append('circle')
+  .attr({
+    'class': 'falure',
+    'cx': function(d) { return scale(d); },
+    'cy': barHeight / 2 + 1.5,
+    'fill': "red",
+    'r': barHeight / 4,
+  });
+
+// Add titles for each step of the pipeline.
+root.selectAll('.step').append('title')
     .text(function(datum) { return datum.title || ''; });
+
   </script>
 </html>
