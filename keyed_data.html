@@ -37,10 +37,11 @@ var numRows = 10;
 // Maximum element, will get scaled to the right number of pixels.
 var maxDataValue = 10;
 // There are up to five stages.
-var numStages = 5;
+var stageNames = ['Export', 'Annotation', 'Summarization', 'Upload']
+var numStages = stageNames.length;
 var oddsOfFinishing = 0.8;
-var oddsOfExtraLease = 0.25;
-var oddsOfFailure = .5;
+var oddsOfExtraLease = 0.2;
+var oddsOfFailure = .45;
 
 // The data, a list of info per row.
 var finishedStages = [];
@@ -53,7 +54,7 @@ for (var i = 0; i < numRows; i++) {
   var leases = [];
   var failures = []
   for (var j = 0; j < numStages; j++) {
-    var currentWidth = Math.random() * maxDataValue / 5;
+    var currentWidth = Math.random() * maxDataValue / numStages;
     leases.push(totalWidth + Math.random() * currentWidth);
     while (Math.random() < oddsOfExtraLease) {
       leases.push(totalWidth + Math.random() * currentWidth);
@@ -65,14 +66,14 @@ for (var i = 0; i < numRows; i++) {
     if (Math.random() < oddsOfFinishing) {
       // The case where this stage has finished.
       widths.push({'start': totalWidth,
-                   'title': 'Step ' + (j + 1),
+                   'title': stageNames[j],
                    'width': currentWidth});
       totalWidth += currentWidth;
     } else {
       // This stage didn't finish.
       pendingStage.push({'name': 'Q' + i,
                          'step': j,
-                         'title': 'Step ' + (j + 1),
+                         'title': stageNames[i],
                          'start': totalWidth});
       break;
     }
@@ -211,8 +212,10 @@ root.selectAll('div.row')
     'cx': function(d) { return scale(d); },
     'cy': barHeight / 2 + 1.5,
     'fill': "green",
+    'stroke': "white",
     'r': barHeight / 4,
-  });
+  }).append('title')
+    .text('Task leased')
 
 // Add dots for each failure.
 root.selectAll('div.row')
@@ -227,8 +230,10 @@ root.selectAll('div.row')
     'cx': function(d) { return scale(d); },
     'cy': barHeight / 2 + 1.5,
     'fill': "red",
+    'stroke': "white",
     'r': barHeight / 4,
-  });
+  }).append('title')
+    .text('Task failed');
 
 // Add titles for each step of the pipeline.
 root.selectAll('.step').append('title')
