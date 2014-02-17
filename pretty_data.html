@@ -21,7 +21,7 @@
     main.append('p')
         .text('The pipeline has N stages that must finish, fading marks stages in progress.')
     main.append('p')
-         .text('Green circles indicate the start of an attempt to finish the stage, red circles indicate a logged failure.')
+         .text('Blue circles indicate the start of an attempt to finish the stage, red circles indicate a logged failure.')
 
 var width = 800;
 var height = 200;
@@ -176,8 +176,6 @@ var bars = svgContainers.selectAll('rect.step')
       'class': 'step',
       'x': barX,
       'y': 3,
-      'rx': 3,
-      'ry': 3,
       'width': barWidth,
       'height': barHeight - 3,
       'fill': COLORS[0],
@@ -214,7 +212,7 @@ root.selectAll('div.row')
     'class': 'lease',
     'cx': function(d) { return scale(d); },
     'cy': barHeight / 2 + 1.5,
-    'fill': "green",
+    'fill': "blue",
     'stroke': "white",
     'r': barHeight / 4,
   }).append('title')
